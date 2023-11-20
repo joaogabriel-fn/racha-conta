@@ -1,3 +1,5 @@
+import { useState } from 'react';
+
 const initialFriends = [
   {
     id: crypto.randomUUID(),
@@ -26,110 +28,109 @@ const getMsgInfo = (balance) =>
     ? { message: `Te deve ${balance} reais`, color: 'green-credit' }
     : { message: `Estão quites`, color: 'white-neutral' };
 
-const App = () => (
-  <>
-    {/* <header className="header">
-      <img src="/imgs/logo-racha-conta.png" alt="" />
-    </header> */}
+const App = () => {
+  const [friends, setFriends] = useState(initialFriends);
+  const [selectedFriend, setSelectedFriend] = useState(null);
+  const [totalBill, setTotalBill] = useState('100');
+  const [mySpend, setMySpend] = useState('50');
+  const [whoWillPay, setWhoWillPay] = useState('you');
 
-    <main className="app">
-      <aside className="sidebar">
-        <ul>
-          {initialFriends.map((friend) => {
-            const { message, color } = getMsgInfo(friend.balance);
+  const handleClickFriend = (friend) =>
+    setSelectedFriend((p) => (p?.id === friend.id ? null : friend));
+  const handleChangeBill = (e) => setTotalBill(e.target.value);
+  const handleChangeMySpend = (e) => setMySpend(e.target.value);
+  const handleChangeWhoWillPay = (e) => setWhoWillPay(e.target.value);
 
-            return (
-              <li key={friend.id}>
-                <img src={friend.avatar} alt={`Avatar de ${friend.name}`} />
-                <h3>{friend.name}</h3>
-                <p className={color}>{message}</p>
-                <button className="button">Selecionar</button>
-              </li>
-            );
-          })}
-        </ul>
+  const handleSubmitShareBill = (e) => {
+    e.preventDefault();
 
-        <button className="button">Adicionar Amigue</button>
-      </aside>
+    setFriends((prev) =>
+      prev.map((friend) =>
+        selectedFriend.id === friend.id
+          ? {
+              ...friend,
+              balance:
+                whoWillPay === 'you'
+                  ? friend.balance + (+totalBill - +mySpend)
+                  : friend.balance - mySpend,
+            }
+          : friend,
+      ),
+    );
+  };
 
-      {true && (
-        <form className="form-split-bill">
-          <h2>Rache a conta com Antônio</h2>
+  return (
+    <>
+      <header className="header">
+        <img src="/imgs/logo-racha-conta.png" alt="" />
+      </header>
 
-          <label>
-            💰 Valor total
-            <input type="text" />
-          </label>
+      <main className="app">
+        <aside className="sidebar">
+          <ul>
+            {friends.map((friend) => {
+              const { message, color } = getMsgInfo(friend.balance);
+              const isSelectedFriend = friend.id === selectedFriend?.id;
 
-          <label>
-            🛍️ Seus gastos
-            <input type="text" />
-          </label>
+              return (
+                <li key={friend.id}>
+                  <img src={friend.avatar} alt={`Avatar de ${friend.name}`} />
+                  <h3>{friend.name}</h3>
+                  <p className={color}>{message}</p>
+                  <button
+                    onClick={() => handleClickFriend(friend)}
+                    className={`button ${
+                      isSelectedFriend ? 'button-close' : ''
+                    }`}
+                  >
+                    {isSelectedFriend ? 'Fechar' : 'Selecionar'}
+                  </button>
+                </li>
+              );
+            })}
+          </ul>
 
-          <label>
-            💸 Quem vai pagar
-            <select name="payer">
-              <option value="me">Você</option>
-              <option value="friend">Amigo</option>
-            </select>
-          </label>
+          <button className="button">Adicionar Amigue</button>
+        </aside>
 
-          <button className="button">Rachar Conta</button>
-        </form>
-      )}
-    </main>
-  </>
-);
+        {selectedFriend && (
+          <form onSubmit={handleSubmitShareBill} className="form-split-bill">
+            <h2>Rache a conta com {selectedFriend.name}</h2>
+
+            <label>
+              💰 Valor total
+              <input
+                type="number"
+                value={totalBill}
+                onChange={handleChangeBill}
+              />
+            </label>
+
+            <label>
+              🛍️ Seus gastos
+              <input
+                type="number"
+                value={mySpend}
+                onChange={handleChangeMySpend}
+              />
+            </label>
+
+            <label>
+              💸 Quem vai pagar
+              <select value={whoWillPay} onChange={handleChangeWhoWillPay}>
+                <option value="you">Você</option>
+                <option value={selectedFriend.name}>
+                  {selectedFriend.name}
+                </option>
+              </select>
+            </label>
+
+            <button className="button">Rachar Conta</button>
+          </form>
+        )}
+      </main>
+    </>
+  );
+};
 
 export { App };
-
-// const App = () => (
-//   <>
-//     <header className="header">
-//       <img src="/imgs/logo-racha-conta.png" alt="" />
-//     </header>
-
-//     <main className="app">
-//       <aside className="sidebar">
-//         <ul>
-//           {initialFriends.map((friend) => (
-//             <li key={friend.id}>
-//               <img src={friend.avatar} alt={`Avatar de ${friend.name}`} />
-//               <h3>{friend.name}</h3>
-//               <p>{friend.displayMessage}</p>
-//               <button className="button">Selecionar</button>
-//             </li>
-//           ))}
-//         </ul>
-
-//         <button className="button">Adicionar Amigue</button>
-//       </aside>
-
-//       {true && (
-//         <form className="form-split-bill">
-//           <h2>Rache a conta com Antônio</h2>
-
-//           <label>
-//             💰 Valor total
-//             <input type="text" />
-//           </label>
-
-//           <label>
-//             🛍️ Seus gastos
-//             <input type="text" />
-//           </label>
-
-//           <label>
-//             💸 Quem vai pagar
-//             <select name="payer">
-//               <option value="me">Você</option>
-//               <option value="friend">Amigo</option>
-//             </select>
-//           </label>
-
-//           <button className="button">Rachar Conta</button>
-//         </form>
-//       )}
-//     </main>
-//   </>
-// );
