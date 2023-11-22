@@ -36,27 +36,20 @@ const App = () => {
   const [mySpend, setMySpend] = useState('50');
   const [whoWillPay, setWhoWillPay] = useState('you');
 
+  const [toggleAddFriend, setToggleAddFriend] = useState(false);
   const [newFriendName, setNewFriendName] = useState('');
   const [newFriendPhoto, setNewFriendPhoto] = useState('');
-  const [addFriend, setAddFriend] = useState(false);
-  const [friendToAdd, setFriendToAdd] = useState({ balance: +0 });
 
   const handleClickFriend = (friend) =>
-    setSelectedFriend((p) => (p?.id === friend.id ? null : friend));
+    setSelectedFriend((prev) => (prev?.id === friend.id ? null : friend));
+
   const handleChangeBill = (e) => setTotalBill(e.target.value);
   const handleChangeMySpend = (e) => setMySpend(e.target.value);
   const handleChangeWhoWillPay = (e) => setWhoWillPay(e.target.value);
 
-  const handleNewFriendName = (e) => setNewFriendName(e.target.value);
-  const handleNewFriendPhoto = (e) => setNewFriendPhoto(e.target.value);
-  const handleAddFriend = () => setAddFriend((prev) => !prev);
-  const handleFriendToAdd = () =>
-    setFriendToAdd((prev) => ({
-      ...prev,
-      id: crypto.randomUUID(),
-      name: newFriendName,
-      avatar: newFriendPhoto,
-    }));
+  const handleClickAddFriend = () => setToggleAddFriend((prev) => !prev);
+  const handleChangeNewFriendName = (e) => setNewFriendName(e.target.value);
+  const handleChangeNewFriendPhoto = (e) => setNewFriendPhoto(e.target.value);
 
   const handleSubmitShareBill = (e) => {
     e.preventDefault();
@@ -69,17 +62,34 @@ const App = () => {
               balance:
                 whoWillPay === 'you'
                   ? friend.balance + (+totalBill - +mySpend)
-                  : friend.balance - mySpend,
+                  : friend.balance - +mySpend,
             }
           : friend,
       ),
     );
+
+    setSelectedFriend(null);
+    setTotalBill('');
+    setMySpend('');
+    setWhoWillPay('you');
   };
 
   const handleSubmitAddFriend = (e) => {
     e.preventDefault();
-    handleAddFriend();
-    setFriends((prev) => [...prev, friendToAdd]);
+
+    setFriends((prev) => [
+      ...prev,
+      {
+        id: crypto.randomUUID(),
+        name: newFriendName,
+        avatar: newFriendPhoto,
+        balance: +0,
+      },
+    ]);
+
+    setNewFriendName('');
+    setNewFriendPhoto('');
+    setToggleAddFriend(false);
   };
 
   return (
@@ -113,29 +123,35 @@ const App = () => {
             })}
           </ul>
 
-          {addFriend && (
+          {toggleAddFriend && (
             <form onSubmit={handleSubmitAddFriend} className="form-add-friend">
               <label>
                 🚶🏿 Nome
-                <input onChange={handleNewFriendName} type="text" />
+                <input
+                  value={newFriendName}
+                  onChange={handleChangeNewFriendName}
+                  type="text"
+                />
               </label>
 
               <label>
                 📷 Foto
-                <input onChange={handleNewFriendPhoto} type="text" />
+                <input
+                  value={newFriendPhoto}
+                  onChange={handleChangeNewFriendPhoto}
+                  type="text"
+                />
               </label>
 
-              <button onClick={handleFriendToAdd} className="button">
-                Adicionar
-              </button>
+              <button className="button">Adicionar</button>
             </form>
           )}
 
           <button
-            onClick={handleAddFriend}
-            className={`button ${addFriend ? 'button-close' : ''}`}
+            onClick={handleClickAddFriend}
+            className={`button ${toggleAddFriend ? 'button-close' : ''}`}
           >
-            {addFriend ? 'Fechar' : 'Adicionar Amigo(a)'}
+            {toggleAddFriend ? 'Fechar' : 'Adicionar Amigo(a)'}
           </button>
         </aside>
 
