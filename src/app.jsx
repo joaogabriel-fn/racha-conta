@@ -98,49 +98,62 @@ const ButtonAddFriend = ({ toggleAddFriend, onClickAddFriend }) => (
   </button>
 );
 
-const FormSplitBill = ({
-  selectedFriend,
-  onSubmitShareBill,
-  totalBill,
-  onChangeBill,
-  mySpend,
-  onChangeMySpend,
-  whoWillPay,
-  onChangeWhoWillPay,
-}) =>
-  selectedFriend && (
-    <form onSubmit={onSubmitShareBill} className="form-split-bill">
-      <h2>Rache a conta com {selectedFriend.name}</h2>
+const FormSplitBill = ({ selectedFriend, onSubmitShareBill }) => {
+  const [totalBill, setTotalBill] = useState('100');
+  const [mySpend, setMySpend] = useState('50');
+  const [whoWillPay, setWhoWillPay] = useState('you');
 
-      <label>
-        💰 Valor total
-        <input type="number" value={totalBill} onChange={onChangeBill} />
-      </label>
+  const handleChangeBill = (e) => setTotalBill(e.target.value);
+  const handleChangeMySpend = (e) => setMySpend(e.target.value);
+  const handleChangeWhoWillPay = (e) => setWhoWillPay(e.target.value);
 
-      <label>
-        🛍️ Seus gastos
-        <input type="number" value={mySpend} onChange={onChangeMySpend} />
-      </label>
+  const handleSubmitShareBill = (e) => {
+    e.preventDefault();
+    onSubmitShareBill({
+      ...selectedFriend,
+      balance:
+        whoWillPay === 'you'
+          ? selectedFriend.balance + (+totalBill - +mySpend)
+          : selectedFriend.balance - +mySpend,
+    });
 
-      <label>
-        💸 Quem vai pagar
-        <select value={whoWillPay} onChange={onChangeWhoWillPay}>
-          <option value="you">Você</option>
-          <option value={selectedFriend.name}>{selectedFriend.name}</option>
-        </select>
-      </label>
+    setTotalBill('');
+    setMySpend('');
+    setWhoWillPay('you');
+  };
 
-      <button className="button">Rachar Conta</button>
-    </form>
+  return (
+    selectedFriend && (
+      <form onSubmit={handleSubmitShareBill} className="form-split-bill">
+        <h2>Rache a conta com {selectedFriend.name}</h2>
+
+        <label>
+          💰 Valor total
+          <input type="number" value={totalBill} onChange={handleChangeBill} />
+        </label>
+
+        <label>
+          🛍️ Seus gastos
+          <input type="number" value={mySpend} onChange={handleChangeMySpend} />
+        </label>
+
+        <label>
+          💸 Quem vai pagar
+          <select value={whoWillPay} onChange={handleChangeWhoWillPay}>
+            <option value="you">Você</option>
+            <option value={selectedFriend.name}>{selectedFriend.name}</option>
+          </select>
+        </label>
+
+        <button className="button">Rachar Conta</button>
+      </form>
+    )
   );
+};
 
 const App = () => {
   const [friends, setFriends] = useState(initialFriends);
   const [selectedFriend, setSelectedFriend] = useState(null);
-
-  const [totalBill, setTotalBill] = useState('100');
-  const [mySpend, setMySpend] = useState('50');
-  const [whoWillPay, setWhoWillPay] = useState('you');
 
   const [toggleAddFriend, setToggleAddFriend] = useState(false);
   const [newFriendName, setNewFriendName] = useState('');
@@ -149,36 +162,9 @@ const App = () => {
   const handleClickFriend = (friend) =>
     setSelectedFriend((prev) => (prev?.id === friend.id ? null : friend));
 
-  const handleChangeBill = (e) => setTotalBill(e.target.value);
-  const handleChangeMySpend = (e) => setMySpend(e.target.value);
-  const handleChangeWhoWillPay = (e) => setWhoWillPay(e.target.value);
-
   const handleClickAddFriend = () => setToggleAddFriend((prev) => !prev);
   const handleChangeNewFriendName = (e) => setNewFriendName(e.target.value);
   const handleChangeNewFriendPhoto = (e) => setNewFriendPhoto(e.target.value);
-
-  const handleSubmitShareBill = (e) => {
-    e.preventDefault();
-
-    setFriends((prev) =>
-      prev.map((friend) =>
-        selectedFriend.id === friend.id
-          ? {
-              ...friend,
-              balance:
-                whoWillPay === 'you'
-                  ? friend.balance + (+totalBill - +mySpend)
-                  : friend.balance - +mySpend,
-            }
-          : friend,
-      ),
-    );
-
-    setSelectedFriend(null);
-    setTotalBill('');
-    setMySpend('');
-    setWhoWillPay('you');
-  };
 
   const handleSubmitAddFriend = (e) => {
     e.preventDefault();
@@ -196,6 +182,11 @@ const App = () => {
     setNewFriendName('');
     setNewFriendPhoto('');
     setToggleAddFriend(false);
+  };
+
+  const handleSubmitShareBill = (friend) => {
+    setFriends((prev) => prev.map((p) => (friend.id === p.id ? friend : p)));
+    setSelectedFriend(null);
   };
 
   return (
@@ -228,12 +219,6 @@ const App = () => {
         <FormSplitBill
           selectedFriend={selectedFriend}
           onSubmitShareBill={handleSubmitShareBill}
-          totalBill={totalBill}
-          onChangeBill={handleChangeBill}
-          mySpend={mySpend}
-          onChangeMySpend={handleChangeMySpend}
-          whoWillPay={whoWillPay}
-          onChangeWhoWillPay={handleChangeWhoWillPay}
         />
       </main>
     </>
