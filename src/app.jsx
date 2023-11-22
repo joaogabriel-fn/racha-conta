@@ -57,37 +57,53 @@ const ListOfFriends = ({ friends, selectedFriend, onClickFriend }) => (
   </ul>
 );
 
-const FormAddFriend = ({
-  toggleAddFriend,
-  onSubmitAddFriend,
-  newFriendName,
-  onChangeNewFriendName,
-  newFriendPhoto,
-  onChangeNewFriendPhoto,
-}) =>
-  toggleAddFriend && (
-    <form onSubmit={onSubmitAddFriend} className="form-add-friend">
-      <label>
-        🚶🏿 Nome
-        <input
-          value={newFriendName}
-          onChange={onChangeNewFriendName}
-          type="text"
-        />
-      </label>
+const FormAddFriend = ({ toggleAddFriend, onSubmitAddFriend }) => {
+  const [newFriendName, setNewFriendName] = useState('');
+  const [newFriendPhoto, setNewFriendPhoto] = useState('');
 
-      <label>
-        📷 Foto
-        <input
-          value={newFriendPhoto}
-          onChange={onChangeNewFriendPhoto}
-          type="text"
-        />
-      </label>
+  const handleChangeNewFriendName = (e) => setNewFriendName(e.target.value);
+  const handleChangeNewFriendPhoto = (e) => setNewFriendPhoto(e.target.value);
 
-      <button className="button">Adicionar</button>
-    </form>
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    const newFriend = {
+      id: crypto.randomUUID(),
+      name: newFriendName,
+      avatar: newFriendPhoto,
+      balance: +0,
+    };
+
+    onSubmitAddFriend(newFriend);
+    setNewFriendName('');
+    setNewFriendPhoto('');
+  };
+
+  return (
+    toggleAddFriend && (
+      <form onSubmit={handleSubmit} className="form-add-friend">
+        <label>
+          🚶🏿 Nome
+          <input
+            value={newFriendName}
+            onChange={handleChangeNewFriendName}
+            type="text"
+          />
+        </label>
+
+        <label>
+          📷 Foto
+          <input
+            value={newFriendPhoto}
+            onChange={handleChangeNewFriendPhoto}
+            type="text"
+          />
+        </label>
+
+        <button className="button">Adicionar</button>
+      </form>
+    )
   );
+};
 
 const ButtonAddFriend = ({ toggleAddFriend, onClickAddFriend }) => (
   <button
@@ -154,39 +170,20 @@ const FormSplitBill = ({ selectedFriend, onSubmitShareBill }) => {
 const App = () => {
   const [friends, setFriends] = useState(initialFriends);
   const [selectedFriend, setSelectedFriend] = useState(null);
-
   const [toggleAddFriend, setToggleAddFriend] = useState(false);
-  const [newFriendName, setNewFriendName] = useState('');
-  const [newFriendPhoto, setNewFriendPhoto] = useState('');
-
-  const handleClickFriend = (friend) =>
-    setSelectedFriend((prev) => (prev?.id === friend.id ? null : friend));
 
   const handleClickAddFriend = () => setToggleAddFriend((prev) => !prev);
-  const handleChangeNewFriendName = (e) => setNewFriendName(e.target.value);
-  const handleChangeNewFriendPhoto = (e) => setNewFriendPhoto(e.target.value);
-
-  const handleSubmitAddFriend = (e) => {
-    e.preventDefault();
-
-    setFriends((prev) => [
-      ...prev,
-      {
-        id: crypto.randomUUID(),
-        name: newFriendName,
-        avatar: newFriendPhoto,
-        balance: +0,
-      },
-    ]);
-
-    setNewFriendName('');
-    setNewFriendPhoto('');
-    setToggleAddFriend(false);
-  };
+  const handleClickFriend = (friend) =>
+    setSelectedFriend((prev) => (prev?.id === friend.id ? null : friend));
 
   const handleSubmitShareBill = (friend) => {
     setFriends((prev) => prev.map((p) => (friend.id === p.id ? friend : p)));
     setSelectedFriend(null);
+  };
+
+  const handleSubmitAddFriend = (newFriend) => {
+    setFriends((prev) => [...prev, newFriend]);
+    setToggleAddFriend(false);
   };
 
   return (
@@ -204,10 +201,6 @@ const App = () => {
           <FormAddFriend
             toggleAddFriend={toggleAddFriend}
             onSubmitAddFriend={handleSubmitAddFriend}
-            newFriendName={newFriendName}
-            onChangeNewFriendName={handleChangeNewFriendName}
-            newFriendPhoto={newFriendPhoto}
-            onChangeNewFriendPhoto={handleChangeNewFriendPhoto}
           />
 
           <ButtonAddFriend
