@@ -34,6 +34,29 @@ const Logo = () => (
   </header>
 );
 
+const ListOfFriends = ({ friends, selectedFriend, onClickFriend }) => (
+  <ul>
+    {friends.map((friend) => {
+      const { message, color } = getMsgInfo(friend.balance);
+      const isSelectedFriend = friend.id === selectedFriend?.id;
+
+      return (
+        <li key={friend.id}>
+          <img src={friend.avatar} alt={`Avatar de ${friend.name}`} />
+          <h3>{friend.name}</h3>
+          <p className={color}>{message}</p>
+          <button
+            onClick={() => onClickFriend(friend)}
+            className={`button ${isSelectedFriend ? 'button-close' : ''}`}
+          >
+            {isSelectedFriend ? 'Fechar' : 'Selecionar'}
+          </button>
+        </li>
+      );
+    })}
+  </ul>
+);
+
 const App = () => {
   const [friends, setFriends] = useState(initialFriends);
   const [selectedFriend, setSelectedFriend] = useState(null);
@@ -104,28 +127,11 @@ const App = () => {
 
       <main className="app">
         <aside className="sidebar">
-          <ul>
-            {friends.map((friend) => {
-              const { message, color } = getMsgInfo(friend.balance);
-              const isSelectedFriend = friend.id === selectedFriend?.id;
-
-              return (
-                <li key={friend.id}>
-                  <img src={friend.avatar} alt={`Avatar de ${friend.name}`} />
-                  <h3>{friend.name}</h3>
-                  <p className={color}>{message}</p>
-                  <button
-                    onClick={() => handleClickFriend(friend)}
-                    className={`button ${
-                      isSelectedFriend ? 'button-close' : ''
-                    }`}
-                  >
-                    {isSelectedFriend ? 'Fechar' : 'Selecionar'}
-                  </button>
-                </li>
-              );
-            })}
-          </ul>
+          <ListOfFriends
+            friends={friends}
+            selectedFriend={selectedFriend}
+            onClickFriend={handleClickFriend}
+          />
 
           {toggleAddFriend && (
             <form onSubmit={handleSubmitAddFriend} className="form-add-friend">
