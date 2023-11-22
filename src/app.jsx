@@ -57,6 +57,38 @@ const ListOfFriends = ({ friends, selectedFriend, onClickFriend }) => (
   </ul>
 );
 
+const FormAddFriend = ({
+  toggleAddFriend,
+  onSubmitAddFriend,
+  newFriendName,
+  onChangeNewFriendName,
+  newFriendPhoto,
+  onChangeNewFriendPhoto,
+}) =>
+  toggleAddFriend && (
+    <form onSubmit={onSubmitAddFriend} className="form-add-friend">
+      <label>
+        🚶🏿 Nome
+        <input
+          value={newFriendName}
+          onChange={onChangeNewFriendName}
+          type="text"
+        />
+      </label>
+
+      <label>
+        📷 Foto
+        <input
+          value={newFriendPhoto}
+          onChange={onChangeNewFriendPhoto}
+          type="text"
+        />
+      </label>
+
+      <button className="button">Adicionar</button>
+    </form>
+  );
+
 const App = () => {
   const [friends, setFriends] = useState(initialFriends);
   const [selectedFriend, setSelectedFriend] = useState(null);
@@ -133,29 +165,14 @@ const App = () => {
             onClickFriend={handleClickFriend}
           />
 
-          {toggleAddFriend && (
-            <form onSubmit={handleSubmitAddFriend} className="form-add-friend">
-              <label>
-                🚶🏿 Nome
-                <input
-                  value={newFriendName}
-                  onChange={handleChangeNewFriendName}
-                  type="text"
-                />
-              </label>
-
-              <label>
-                📷 Foto
-                <input
-                  value={newFriendPhoto}
-                  onChange={handleChangeNewFriendPhoto}
-                  type="text"
-                />
-              </label>
-
-              <button className="button">Adicionar</button>
-            </form>
-          )}
+          <FormAddFriend
+            toggleAddFriend={toggleAddFriend}
+            onSubmitAddFriend={handleSubmitAddFriend}
+            newFriendName={newFriendName}
+            onChangeNewFriendName={handleChangeNewFriendName}
+            newFriendPhoto={newFriendPhoto}
+            onChangeNewFriendPhoto={handleChangeNewFriendPhoto}
+          />
 
           <button
             onClick={handleClickAddFriend}
