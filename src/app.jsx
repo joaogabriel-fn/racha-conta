@@ -89,6 +89,15 @@ const FormAddFriend = ({
     </form>
   );
 
+const ButtonAddFriend = ({ toggleAddFriend, onClickAddFriend }) => (
+  <button
+    onClick={onClickAddFriend}
+    className={`button ${toggleAddFriend ? 'button-close' : ''}`}
+  >
+    {toggleAddFriend ? 'Fechar' : 'Adicionar Amigo(a)'}
+  </button>
+);
+
 const App = () => {
   const [friends, setFriends] = useState(initialFriends);
   const [selectedFriend, setSelectedFriend] = useState(null);
@@ -174,12 +183,10 @@ const App = () => {
             onChangeNewFriendPhoto={handleChangeNewFriendPhoto}
           />
 
-          <button
-            onClick={handleClickAddFriend}
-            className={`button ${toggleAddFriend ? 'button-close' : ''}`}
-          >
-            {toggleAddFriend ? 'Fechar' : 'Adicionar Amigo(a)'}
-          </button>
+          <ButtonAddFriend
+            toggleAddFriend={toggleAddFriend}
+            onClickAddFriend={handleClickAddFriend}
+          />
         </aside>
 
         {selectedFriend && (
