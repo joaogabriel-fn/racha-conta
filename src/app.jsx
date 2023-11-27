@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Logo } from './components/logo';
 import { ButtonAddFriend } from './components/button-add-friend';
 import { FormAddFriend } from './components/form-add-friend';
@@ -30,6 +30,14 @@ const App = () => {
   const [friends, setFriends] = useState(initialFriends);
   const [selectedFriend, setSelectedFriend] = useState(null);
   const [toggleAddFriend, setToggleAddFriend] = useState(false);
+
+  useEffect(() => {
+    const pageTitle = selectedFriend
+      ? `${selectedFriend.name} foi selecionado(a)`
+      : 'Racha-Conta';
+
+    document.title = pageTitle;
+  }, [selectedFriend]);
 
   const handleClickAddFriend = () => setToggleAddFriend((prev) => !prev);
   const handleClickFriend = (friend) =>
