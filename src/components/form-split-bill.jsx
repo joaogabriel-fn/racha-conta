@@ -1,55 +1,47 @@
-import { useState } from 'react';
+import { useEffect } from 'react';
 
 const FormSplitBill = ({ selectedFriend, onSubmitShareBill }) => {
-  const [totalBill, setTotalBill] = useState('100');
-  const [mySpend, setMySpend] = useState('50');
-  const [whoWillPay, setWhoWillPay] = useState('you');
-
-  const handleChangeBill = (e) => setTotalBill(e.target.value);
-  const handleChangeMySpend = (e) => setMySpend(e.target.value);
-  const handleChangeWhoWillPay = (e) => setWhoWillPay(e.target.value);
+  useEffect(() => {
+    document.title = `${selectedFriend.name} foi selecionado(a)`;
+    return () => (document.title = 'Racha-conta');
+  }, [selectedFriend.name]);
 
   const handleSubmitShareBill = (e) => {
     e.preventDefault();
+    const { totalBill, mySpend, whoWillPay } = e.target.elements;
     onSubmitShareBill({
       ...selectedFriend,
       balance:
-        whoWillPay === 'you'
-          ? selectedFriend.balance + (+totalBill - +mySpend)
-          : selectedFriend.balance - +mySpend,
+        whoWillPay.value === 'you'
+          ? selectedFriend.balance + (+totalBill.value - +mySpend.value)
+          : selectedFriend.balance - +mySpend.value,
     });
-
-    setTotalBill('');
-    setMySpend('');
-    setWhoWillPay('you');
   };
 
   return (
-    selectedFriend && (
-      <form onSubmit={handleSubmitShareBill} className="form-split-bill">
-        <h2>Rache a conta com {selectedFriend.name}</h2>
+    <form onSubmit={handleSubmitShareBill} className="form-split-bill">
+      <h2>Rache a conta com {selectedFriend.name}</h2>
 
-        <label>
-          💰 Valor total
-          <input type="number" value={totalBill} onChange={handleChangeBill} />
-        </label>
+      <label>
+        💰 Valor total
+        <input type="number" name="totalBill" />
+      </label>
 
-        <label>
-          🛍️ Seus gastos
-          <input type="number" value={mySpend} onChange={handleChangeMySpend} />
-        </label>
+      <label>
+        🛍️ Seus gastos
+        <input type="number" name="mySpend" />
+      </label>
 
-        <label>
-          💸 Quem vai pagar
-          <select value={whoWillPay} onChange={handleChangeWhoWillPay}>
-            <option value="you">Você</option>
-            <option value={selectedFriend.name}>{selectedFriend.name}</option>
-          </select>
-        </label>
+      <label>
+        💸 Quem vai pagar
+        <select name="whoWillPay">
+          <option value="you">Você</option>
+          <option value={selectedFriend.name}>{selectedFriend.name}</option>
+        </select>
+      </label>
 
-        <button className="button">Rachar Conta</button>
-      </form>
-    )
+      <button className="button">Rachar Conta</button>
+    </form>
   );
 };
 

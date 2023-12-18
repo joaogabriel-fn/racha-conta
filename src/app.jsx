@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useReducer } from 'react';
 import { Logo } from './components/logo';
 import { ButtonAddFriend } from './components/button-add-friend';
 import { FormAddFriend } from './components/form-add-friend';
@@ -26,32 +26,49 @@ const initialFriends = [
   },
 ];
 
+const reducer = (state, action) =>
+  ({
+    submitted_share_bill: {
+      ...state,
+      selectedFriend: null,
+      friends: state.friends.map((p) =>
+        action.friend?.id === p.id ? action.friend : p,
+      ),
+    },
+    selected_friend: {
+      ...state,
+      selectedFriend:
+        state.selectedFriend?.id === action.friend?.id ? null : action.friend,
+    },
+    submitted_new_friend: {
+      ...state,
+      toggleAddFriend: false,
+      friends: [...state.friends, action.newFriend],
+    },
+    clicked_to_add_new_friend: {
+      ...state,
+      toggleAddFriend: !state.toggleAddFriend,
+    },
+  })[action.type] || state;
+
+const initialState = {
+  friends: initialFriends,
+  selectedFriend: null,
+  toggleAddFriend: false,
+};
+
 const App = () => {
-  const [friends, setFriends] = useState(initialFriends);
-  const [selectedFriend, setSelectedFriend] = useState(null);
-  const [toggleAddFriend, setToggleAddFriend] = useState(false);
+  const [state, dispatch] = useReducer(reducer, initialState);
 
-  useEffect(() => {
-    const pageTitle = selectedFriend
-      ? `${selectedFriend.name} foi selecionado(a)`
-      : 'Racha-Conta';
-
-    document.title = pageTitle;
-  }, [selectedFriend]);
-
-  const handleClickAddFriend = () => setToggleAddFriend((prev) => !prev);
+  const handleClickAddFriend = () =>
+    dispatch({ type: 'clicked_to_add_new_friend' });
   const handleClickFriend = (friend) =>
-    setSelectedFriend((prev) => (prev?.id === friend.id ? null : friend));
+    dispatch({ type: 'selected_friend', friend });
+  const handleSubmitShareBill = (friend) =>
+    dispatch({ type: 'submitted_share_bill', friend });
 
-  const handleSubmitShareBill = (friend) => {
-    setFriends((prev) => prev.map((p) => (friend.id === p.id ? friend : p)));
-    setSelectedFriend(null);
-  };
-
-  const handleSubmitAddFriend = (newFriend) => {
-    setFriends((prev) => [...prev, newFriend]);
-    setToggleAddFriend(false);
-  };
+  const handleSubmitAddFriend = (newFriend) =>
+    dispatch({ type: 'submitted_new_friend', newFriend });
 
   return (
     <>
@@ -60,26 +77,27 @@ const App = () => {
       <main className="app">
         <aside className="sidebar">
           <ListOfFriends
-            friends={friends}
-            selectedFriend={selectedFriend}
+            friends={state.friends}
+            selectedFriend={state.selectedFriend}
             onClickFriend={handleClickFriend}
           />
 
-          <FormAddFriend
-            toggleAddFriend={toggleAddFriend}
-            onSubmitAddFriend={handleSubmitAddFriend}
-          />
+          {state.toggleAddFriend && (
+            <FormAddFriend onSubmitAddFriend={handleSubmitAddFriend} />
+          )}
 
           <ButtonAddFriend
-            toggleAddFriend={toggleAddFriend}
+            toggleAddFriend={state.toggleAddFriend}
             onClickAddFriend={handleClickAddFriend}
           />
         </aside>
 
-        <FormSplitBill
-          selectedFriend={selectedFriend}
-          onSubmitShareBill={handleSubmitShareBill}
-        />
+        {state.selectedFriend && (
+          <FormSplitBill
+            selectedFriend={state.selectedFriend}
+            onSubmitShareBill={handleSubmitShareBill}
+          />
+        )}
       </main>
     </>
   );
